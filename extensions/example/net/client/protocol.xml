@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Client-to-server packets for the Example extension.
+  Place client-bound packets in net/client/protocol.xml.
+-->
+<protocol>
+    <packet family="Example" action="Request">
+        <comment>Request an example action from the server.</comment>
+        <field name="item_id" type="short"/>
+    </packet>
+</protocol>

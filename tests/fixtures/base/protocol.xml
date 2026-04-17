@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="PacketFamily" type="byte">
+        <value name="Connection">1</value>
+        <value name="Walk">6</value>
+        <value name="Talk">18</value>
+    </enum>
+
+    <enum name="Direction" type="char">
+        <value name="Down">0</value>
+        <value name="Left">1</value>
+        <value name="Up">2</value>
+        <value name="Right">3</value>
+    </enum>
+
+    <struct name="Coords">
+        <field name="x" type="char"/>
+        <field name="y" type="char"/>
+    </struct>
+
+    <packet family="Walk" action="Player">
+        <field name="direction" type="Direction"/>
+        <field name="timestamp" type="three"/>
+        <field name="coords" type="Coords"/>
+    </packet>
+</protocol>

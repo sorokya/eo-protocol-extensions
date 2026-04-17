@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Replace: swap out Coords with a 3-axis version -->
+<protocol>
+    <struct name="Coords" extend="replace">
+        <field name="x" type="short"/>
+        <field name="y" type="short"/>
+        <field name="layer" type="char"/>
+    </struct>
+</protocol>

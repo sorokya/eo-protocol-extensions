@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- New: add a brand-new enum that doesn't exist in the base -->
+<protocol>
+    <enum name="Rarity" type="char">
+        <value name="Common">0</value>
+        <value name="Rare">1</value>
+    </enum>
+</protocol>

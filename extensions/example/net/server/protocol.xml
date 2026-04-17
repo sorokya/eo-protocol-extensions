@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Server-to-client packets for the Example extension.
+  Place server-bound packets in net/server/protocol.xml.
+-->
+<protocol>
+    <packet family="Example" action="Reply">
+        <comment>Server response to an Example::Request.</comment>
+        <field name="item_id" type="short"/>
+        <field name="rarity" type="ExampleRarity"/>
+    </packet>
+</protocol>

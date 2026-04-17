@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Conflict: attempts to define PacketFamily as new — but it already exists -->
+<protocol>
+    <enum name="PacketFamily" type="byte">
+        <value name="Duplicate">99</value>
+    </enum>
+</protocol>
