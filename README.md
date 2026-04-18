@@ -49,8 +49,7 @@ Requires Python 3.9+.
 | Command | Description |
 |---|---|
 | `eolib-ext apply` | Merge extensions into an eolib fork directory |
-| `eolib-ext list` | List available extensions in the official registry |
-| `eolib-ext validate` | Validate `extensions.xml` and check for conflicts (no cloning) |
+| `eolib-ext validate` | Fetch extensions and dry-run merge without cloning the full eolib |
 
 ---
 
@@ -113,26 +112,11 @@ eolib-ext v0.1.0
 
 ---
 
-### `eolib-ext list`
-
-Lists extensions available in the official registry (and any custom repos specified in config).
-
-```bash
-eolib-ext list
-```
-
-```
-Extensions in https://github.com/cirras/eo-protocol-extensions:
-  deep     EO 0.3.x "deep" client protocol extensions (by Vult-r)
-  example  Reference extension used for testing
-```
-
----
-
 ### `eolib-ext validate`
 
-Validates your `extensions.xml` and checks for merge conflicts without cloning the eolib.
-Ideal for CI on an extension repository.
+Fetches the base `eo-protocol` and all extensions to the local cache, then performs a
+dry-run merge to check for conflicts — without cloning the full eolib implementation.
+Useful for quickly catching merge errors during extension development.
 
 ```bash
 eolib-ext validate --config=extensions.xml

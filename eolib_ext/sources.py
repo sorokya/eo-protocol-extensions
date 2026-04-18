@@ -15,7 +15,8 @@ import git
 
 from .models import Extension, ResolvedExtension
 
-OFFICIAL_REPO = "https://github.com/cirras/eo-protocol-extensions"
+OFFICIAL_REPO = "https://github.com/sorokya/eo-protocol-extensions"
+BASE_PROTOCOL_REPO = "https://github.com/Cirras/eo-protocol"
 CACHE_DIR = Path.home() / ".cache" / "eolib-ext"
 
 
@@ -87,6 +88,26 @@ def _resolve_file(extension: Extension, config_dir: Path) -> ResolvedExtension:
         )
 
     return ResolvedExtension(name=extension.name, local_path=str(ext_path))
+
+
+def fetch_base_protocol() -> list[Path]:
+    """
+    Clone or update the base eo-protocol repo and return its protocol.xml files.
+    Cached at ~/.cache/eolib-ext/ like extension repos.
+    """
+    cache = _cache_path(BASE_PROTOCOL_REPO)
+    if cache.exists():
+        repo = git.Repo(cache)
+        repo.remotes.origin.fetch()
+        default_branch = repo.remotes.origin.refs[0].remote_head
+        repo.git.checkout(default_branch)
+        repo.remotes.origin.pull()
+    else:
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        git.Repo.clone_from(BASE_PROTOCOL_REPO, cache)
+
+    xml_dir = cache / "xml"
+    return sorted(xml_dir.rglob("protocol.xml"))
 
 
 def resolve_extension_files(resolved: ResolvedExtension) -> list[Path]:

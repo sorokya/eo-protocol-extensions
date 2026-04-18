@@ -3,12 +3,10 @@ eolib-ext CLI — apply protocol extensions to a forked eolib implementation.
 
 Commands:
   apply     Fetch extensions, merge XML, clone eolib, output a ready-to-build fork.
-  list      List extensions available in the official (or custom) registry.
   validate  Check extensions.xml for merge conflicts without cloning the eolib.
 """
 
 import shutil
-import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Optional
@@ -16,13 +14,11 @@ from typing import Optional
 import git
 import typer
 from rich.console import Console
-from rich.table import Table
-from rich import print as rprint
 
-from .languages import get_target, KNOWN_LANGUAGES
+from .languages import get_target
 from .merger import MergeError, merge_protocol_file, load_base_elements
 from .models import Extension
-from .sources import OFFICIAL_REPO, resolve, resolve_extension_files
+from .sources import OFFICIAL_REPO, resolve, resolve_extension_files, fetch_base_protocol
 
 app = typer.Typer(
     name="eolib-ext",
@@ -204,63 +200,14 @@ def _print_usage_hint(language: str, output_dir: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# list
-# ---------------------------------------------------------------------------
-
-@app.command(name="list")
-def list_extensions(
-    repo: str = typer.Option(OFFICIAL_REPO, "--repo", "-r", help="Extension registry URL to inspect"),
-):
-    """List extensions available in the official or a custom registry."""
-    from .sources import _cache_path, CACHE_DIR
-    import os
-
-    cache = _cache_path(repo)
-    with console.status(f"Fetching registry {repo}..."):
-        try:
-            if cache.exists():
-                git_repo = git.Repo(cache)
-                git_repo.remotes.origin.fetch()
-                git_repo.remotes.origin.pull()
-            else:
-                cache.parent.mkdir(parents=True, exist_ok=True)
-                git_repo = git.Repo.clone_from(repo, cache)
-        except git.GitCommandError as e:
-            err_console.print(f"[red]Error:[/red] Failed to fetch registry: {e}")
-            raise typer.Exit(1)
-
-    extensions_dir = cache / "extensions"
-    if not extensions_dir.exists():
-        console.print("[yellow]No extensions/ directory found in this registry.[/yellow]")
-        raise typer.Exit(0)
-
-    entries = sorted(p for p in extensions_dir.iterdir() if p.is_dir() and not p.name.startswith("."))
-
-    if not entries:
-        console.print("[yellow]No extensions found in registry.[/yellow]")
-        raise typer.Exit(0)
-
-    table = Table(title=f"Extensions in {repo}", show_header=True)
-    table.add_column("Name", style="bold")
-    table.add_column("Files")
-
-    for entry in entries:
-        file_count = len(list(entry.rglob("protocol.xml")))
-        table.add_row(entry.name, f"{file_count} protocol file(s)")
-
-    console.print(table)
-
-
-# ---------------------------------------------------------------------------
 # validate
 # ---------------------------------------------------------------------------
 
 @app.command()
 def validate(
     config: Path = typer.Option(Path("extensions.xml"), "--config", "-c", help="Path to extensions.xml"),
-    protocol_dir: Optional[Path] = typer.Option(None, "--protocol-dir", "-p", help="Path to base protocol xml/ directory"),
 ):
-    """Check extensions.xml for merge conflicts without cloning the full eolib."""
+    """Fetch extensions and the base protocol, then dry-run merge to check for conflicts."""
 
     console.print("[bold]Validating extensions...[/bold]\n")
 
@@ -271,7 +218,7 @@ def validate(
     config_dir = config.parent.resolve()
     extensions = parse_extensions_xml(config)
 
-    # Resolve sources
+    # Resolve extension sources
     resolved_extensions = []
     for ext in extensions:
         try:
@@ -285,16 +232,16 @@ def validate(
 
     console.print()
 
-    # Load base elements if protocol_dir provided
-    base_elements = []
-    if protocol_dir:
-        base_files = sorted(protocol_dir.rglob("protocol.xml"))
-        base_elements = load_base_elements(base_files)
-        console.print(f"  Loaded base protocol from {protocol_dir}")
-    else:
-        console.print("  [dim]No --protocol-dir given; validating extension conflicts only.[/dim]")
+    # Fetch base protocol
+    with console.status("Fetching base eo-protocol..."):
+        try:
+            base_files = fetch_base_protocol()
+        except Exception as e:
+            err_console.print(f"[red]Error:[/red] Failed to fetch base protocol: {e}")
+            raise typer.Exit(1)
 
-    console.print()
+    base_elements = load_base_elements(base_files)
+    console.print(f"  [green]✓[/green] Base protocol loaded ({len(base_files)} files)\n")
 
     # Dry-run merge
     for resolved in resolved_extensions:
