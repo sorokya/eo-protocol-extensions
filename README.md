@@ -8,6 +8,14 @@ Official protocol extensions and the `eolib-ext` tool for the
 
 ---
 
+## Official extensions
+
+| Name | Description |
+|------|-------------|
+| [`deep`](extensions/deep/) | The "Deep" protocol extensions created by Vult-r. Adds and extends packets for features of the 0.3.x client version |
+
+---
+
 ## What are protocol extensions?
 
 The [eo-protocol](https://github.com/Cirras/eo-protocol) repository defines the binary
