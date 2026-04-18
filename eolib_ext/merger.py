@@ -10,7 +10,8 @@ Each element in an extension file may carry an optional 'extend' attribute:
   append   → append:  Push child elements (values/fields) onto an existing definition.
   replace  → replace: Completely swap out an existing definition.
 
-Packets are identified by (family, action). Enums and structs by name.
+Packets are identified by (direction, family, action) where direction is "client",
+"server", or "" derived from the file path. Enums and structs are identified by name.
 """
 
 import xml.etree.ElementTree as ET
@@ -24,8 +25,23 @@ class MergeError(Exception):
     pass
 
 
+# Internal attribute used to tag packet elements with their client/server direction.
+_DIR_ATTR = "_eoext_direction"
+
+
+def _direction_from_path(path: Path) -> str:
+    parts = set(path.parts)
+    if "client" in parts:
+        return "client"
+    if "server" in parts:
+        return "server"
+    return ""
+
+
 def _packet_id(el: ET.Element) -> str:
-    return f"{el.get('family')}::{el.get('action')}"
+    direction = el.get(_DIR_ATTR, "")
+    prefix = f"{direction}:" if direction else ""
+    return f"{prefix}{el.get('family')}{el.get('action')}"
 
 
 def _element_id(el: ET.Element) -> str:
@@ -44,6 +60,12 @@ def _find_existing(
         if _element_id(existing) == el_id:
             return existing
     return None
+
+
+def _tag_packet(el: ET.Element, path: Path) -> None:
+    """Attach direction metadata to a packet element derived from its file path."""
+    if el.tag == "packet":
+        el.set(_DIR_ATTR, _direction_from_path(path))
 
 
 def merge_protocol_file(
@@ -73,6 +95,7 @@ def merge_protocol_file(
         if el.tag in ("comment", ET.Comment):
             continue
 
+        _tag_packet(el, extension_file)
         extend = el.get("extend")
         el_id = _element_id(el)
         tag = el.tag
@@ -239,5 +262,6 @@ def load_base_elements(base_protocol_files: list[Path]) -> list[ET.Element]:
         root = tree.getroot()
         for el in root:
             if el.tag not in ("comment", ET.Comment):
+                _tag_packet(el, f)
                 elements.append(el)
     return elements

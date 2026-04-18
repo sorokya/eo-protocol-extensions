@@ -27,7 +27,7 @@ class ResolvedExtension:
 class ElementChange:
     kind: str           # "new", "append", or "replace"
     element_type: str   # "enum", "struct", or "packet"
-    identifier: str     # name (enum/struct) or "Family::Action" (packet)
+    identifier: str     # name (enum/struct) or "FamilyAction" (packet)
 
 
 @dataclass

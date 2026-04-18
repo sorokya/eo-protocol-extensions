@@ -20,7 +20,7 @@ def element_ids(elements: list[ET.Element], tag: str) -> list[str]:
         if el.tag != tag:
             continue
         if tag == "packet":
-            out.append(f"{el.get('family')}::{el.get('action')}")
+            out.append(f"{el.get('family')}{el.get('action')}")
         else:
             out.append(el.get("name", ""))
     return out
@@ -260,7 +260,7 @@ class TestAppendSwitch:
     def test_result_counts(self):
         elements = fresh_base()
         result = merge_protocol_file(elements, FIXTURES / "ext_append_switch" / "protocol.xml", "ext_switch")
-        assert result.append_count == 4  # ShapeType enum + Shape + ShapeMessage + Walk::Player
+        assert result.append_count == 4  # ShapeType enum + Shape + ShapeMessage + WalkPlayer
         assert result.new_count == 0
         assert result.replace_count == 0
 

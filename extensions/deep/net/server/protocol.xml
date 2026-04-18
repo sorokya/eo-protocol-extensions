@@ -55,7 +55,7 @@
 
     <packet family="Account" action="Config">
         <comment>
-            Optional packet sent immediately after receiving the Account::Request packet.
+            Optional packet sent immediately after receiving the AccountRequest packet.
             delay_time initializes the account creation delay in seconds (10-600).
             email_validation=1 forces the client into emailed PIN-code validation mode.
         </comment>
@@ -64,13 +64,13 @@
     </packet>
 
     <packet family="Account" action="Accept">
-        <comment>Server response to the Account::Accept (client) validation packet.</comment>
+        <comment>Server response to the AccountAccept (client) validation packet.</comment>
         <field name="reply_code" type="AccountValidationReply" />
     </packet>
 
     <packet family="Login" action="Config">
         <comment>
-            Optional packet sent immediately after accepting the first Login::Request packet.
+            Optional packet sent immediately after accepting the first LoginRequest packet.
             Initializes the character creation dialog: number of unlocked skins, number of
             selectable hair modals, and maximum character name length (valid range: 12-14).
         </comment>
@@ -80,7 +80,7 @@
     </packet>
 
     <packet family="Login" action="Take">
-        <comment>Server response to the Login::Take (forgot password) client packet. Opens the
+        <comment>Server response to the LoginTake (forgot password) client packet. Opens the
             password recovery screen on the client.</comment>
         <field name="reply_code" type="AccountRecoverReply" />
     </packet>
@@ -160,7 +160,7 @@
     <packet family="AdminInteract" action="Create">
         <comment>
             Opens a new info dialog on the client with a caption and one or more lines. Client
-            ignores subsequent AdminInteract::Add packets if no dialog is open.
+            ignores subsequent AdminInteractAdd packets if no dialog is open.
         </comment>
         <chunked>
             <field name="title" type="string" />

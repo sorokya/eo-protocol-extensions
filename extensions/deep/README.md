@@ -44,37 +44,37 @@ Official implementation guide: https://www.endless-online.com/deep/techinfo.html
 
 | Packet | Description |
 |---|---|
-| `Account::Config` | Account creation delay time and email validation flag |
-| `Account::Accept` | Reply to email PIN-code validation |
-| `Login::Config` | Max skins, hair modals, and character name length for character creation |
-| `Login::Take` | Reply to "forgot password?" — opens recovery screen |
-| `Login::Create` | Reply to account name submission for recovery |
-| `Login::Accept` | Reply to recovery PIN submission |
-| `Login::Agree` | Reply to new password submission |
-| `Boss::Ping` | Boss NPC HP broadcast |
-| `Captcha::Open` | Show captcha popup (server-checked or client-checked mode) |
-| `Captcha::Agree` | Update captcha popup with a new challenge |
-| `Captcha::Close` | Close captcha popup and award experience |
-| `AdminInteract::Create` | Open a new Communications info dialog |
-| `AdminInteract::Add` | Append lines to an open Communications dialog |
-| `Paperdoll::Swap` | Equip-swap result with full paperdoll stats update |
+| `AccountConfig` | Account creation delay time and email validation flag |
+| `AccountAccept` | Reply to email PIN-code validation |
+| `LoginConfig` | Max skins, hair modals, and character name length for character creation |
+| `LoginTake` | Reply to "forgot password?" — opens recovery screen |
+| `LoginCreate` | Reply to account name submission for recovery |
+| `LoginAccept` | Reply to recovery PIN submission |
+| `LoginAgree` | Reply to new password submission |
+| `BossPing` | Boss NPC HP broadcast |
+| `CaptchaOpen` | Show captcha popup (server-checked or client-checked mode) |
+| `CaptchaAgree` | Update captcha popup with a new challenge |
+| `CaptchaClose` | Close captcha popup and award experience |
+| `AdminInteractCreate` | Open a new Communications info dialog |
+| `AdminInteractAdd` | Append lines to an open Communications dialog |
+| `PaperdollSwap` | Equip-swap result with full paperdoll stats update |
 
 ### Extended server packets
 
 | Packet | Added fields |
 |---|---|
-| `Barber::Open` | `max_hair_styles`, `base_cost`, `cost_per_level` |
+| `BarberOpen` | `max_hair_styles`, `base_cost`, `cost_per_level` |
 
 ### New client packets
 
 | Packet | Description |
 |---|---|
-| `Account::Accept` | Submit emailed PIN-code to complete account validation |
-| `Login::Take` | "Forgot password?" button click |
-| `Login::Create` | Submit account name for password recovery |
-| `Login::Accept` | Submit 7-digit recovery PIN code |
-| `Login::Agree` | Submit new password (with account name and PIN) |
-| `Captcha::Reply` | Submit captcha answer |
-| `Captcha::Request` | Request a new captcha after too many failures |
-| `Item::Report` | Submit a new title string via a title certificate (item type 28) |
-| `AdminInteract::Take` | `#item` / `#npc` pub lookup |
+| `AccountAccept` | Submit emailed PIN-code to complete account validation |
+| `LoginTake` | "Forgot password?" button click |
+| `LoginCreate` | Submit account name for password recovery |
+| `LoginAccept` | Submit 7-digit recovery PIN code |
+| `LoginAgree` | Submit new password (with account name and PIN) |
+| `CaptchaReply` | Submit captcha answer |
+| `CaptchaRequest` | Request a new captcha after too many failures |
+| `ItemReport` | Submit a new title string via a title certificate (item type 28) |
+| `AdminInteractTake` | `#item` / `#npc` pub lookup |
