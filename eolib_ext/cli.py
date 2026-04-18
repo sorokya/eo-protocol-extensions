@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 eolib-ext CLI — apply protocol extensions to a forked eolib implementation.
 

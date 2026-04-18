@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Resolves Extension objects to local directories.
 

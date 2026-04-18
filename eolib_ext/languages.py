@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Known eolib implementations and their repository URLs."""
 
 from dataclasses import dataclass

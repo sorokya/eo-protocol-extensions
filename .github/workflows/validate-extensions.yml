@@ -3,11 +3,7 @@ name: Validate Extensions
 on:
   push:
     branches: [ master ]
-    paths:
-      - "extensions/**"
   pull_request:
-    paths:
-      - "extensions/**"
 
 jobs:
   validate:
