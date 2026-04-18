@@ -1,6 +1,6 @@
 # Authoring Extensions
 
-This guide explains how to create a protocol extension for use with `protomerge`.
+This guide explains how to create a protocol extension for use with `eo-proto-merge`.
 
 ---
 
@@ -9,7 +9,7 @@ This guide explains how to create a protocol extension for use with `protomerge`
 An extension is a directory containing one or more `protocol.xml` files that add to or
 modify the base [eo-protocol](https://github.com/Cirras/eo-protocol) definitions.
 
-Extensions are applied in order using the `protomerge apply` command. Each extension can:
+Extensions are applied in order using the `eo-proto-merge apply` command. Each extension can:
 - **Add** new enums, structs, or packets
 - **Append** new values or fields to existing definitions
 - **Replace** existing definitions entirely
@@ -134,7 +134,7 @@ Reference your extension directory directly in `extensions.xml`:
 Then apply:
 
 ```
-protomerge apply --config=extensions.xml
+eo-proto-merge apply --config=extensions.xml
 ```
 
 ### As a git repository
@@ -195,5 +195,5 @@ Extension names should be lowercase, hyphen-separated, and descriptive (e.g. `de
 
 ## See also
 
-- [protomerge CLI reference](https://github.com/sorokya/protomerge)
-- [`extensions.xml` format](README.md#using-extensions-with-protomerge) in the main README
+- [eo-proto-merge CLI reference](https://github.com/sorokya/eo-proto-merge)
+- [`extensions.xml` format](README.md#using-extensions-with-eo-proto-merge) in the main README

@@ -26,17 +26,17 @@ new packets, modify existing enums, or extend structs — without permanently fo
 base protocol.
 
 Each extension is a directory of `protocol.xml` files. The
-[protomerge](https://github.com/sorokya/protomerge) CLI tool merges them into a complete
+[eo-proto-merge](https://github.com/sorokya/eo-proto-merge) CLI tool merges them into a complete
 copy of the eo-protocol XML, ready to pass to an eolib code generator.
 
 ---
 
-## Using extensions with `protomerge`
+## Using extensions with `eo-proto-merge`
 
-Install [protomerge](https://github.com/sorokya/protomerge):
+Install [eo-proto-merge](https://github.com/sorokya/eo-proto-merge):
 
 ```bash
-pip install git+https://github.com/sorokya/protomerge.git
+pip install git+https://github.com/sorokya/eo-proto-merge.git
 ```
 
 Create an `extensions.xml` in your project:
@@ -55,11 +55,11 @@ Create an `extensions.xml` in your project:
 Then apply:
 
 ```bash
-protomerge apply --config=extensions.xml --output=./eo-protocol
+eo-proto-merge apply --config=extensions.xml --output=./eo-protocol
 ```
 
 This writes a merged `eo-protocol/` directory you can point your eolib code generator at.
-See the [protomerge README](https://github.com/sorokya/protomerge) for the full CLI reference.
+See the [eo-proto-merge README](https://github.com/sorokya/eo-proto-merge) for the full CLI reference.
 
 ---
 

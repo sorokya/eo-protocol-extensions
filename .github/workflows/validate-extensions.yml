@@ -20,8 +20,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install protomerge
-        run: pip install git+https://github.com/sorokya/protomerge.git
+      - name: Install eo-proto-merge
+        run: pip install eo-proto-merge
 
       - name: Write extensions config
         run: |
@@ -32,4 +32,4 @@ jobs:
           EOF
 
       - name: Validate official extensions
-        run: protomerge validate --config=extensions.xml
+        run: eo-proto-merge validate --config=extensions.xml
