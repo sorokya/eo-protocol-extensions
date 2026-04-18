@@ -27,9 +27,7 @@ jobs:
         run: |
           cat > extensions.xml << 'EOF'
           <extensions>
-            <extension type="file" name="deep">
-              <path>extensions/deep</path>
-            </extension>
+            <extension type="file" name="deep" path="extensions/deep" />
           </extensions>
           EOF
 
