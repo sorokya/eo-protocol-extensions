@@ -1,5 +1,8 @@
 # eo-protocol-extensions
 
+[![Tests](https://github.com/sorokya/eo-protocol-extensions/actions/workflows/tests.yml/badge.svg)](https://github.com/sorokya/eo-protocol-extensions/actions/workflows/tests.yml)
+[![Validate Extensions](https://github.com/sorokya/eo-protocol-extensions/actions/workflows/validate-extensions.yml/badge.svg)](https://github.com/sorokya/eo-protocol-extensions/actions/workflows/validate-extensions.yml)
+
 Official protocol extensions and the `eolib-ext` tool for the
 [Endless Online](https://github.com/Cirras/eo-protocol) library ecosystem.
 
