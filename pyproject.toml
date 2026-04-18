@@ -6,8 +6,9 @@ build-backend = "setuptools.build_meta"
 name = "eolib-ext"
 version = "0.1.0"
 description = "CLI tool for applying protocol extensions to Endless Online library implementations"
+authors = [{ name = "Richard Leek", email = "richard@richardleek.com" }]
 readme = "README.md"
-license = { text = "MIT" }
+license = { file = "LICENSE.txt" }
 requires-python = ">=3.9"
 dependencies = ["typer[all]>=0.12", "rich>=13", "gitpython>=3.1"]
 
