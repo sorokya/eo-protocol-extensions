@@ -95,7 +95,7 @@ eolib-ext v0.1.0
 **Extension not found:**
 
 ```
- ✘  Extension 'blah' not found in https://github.com/cirras/eo-protocol-extensions
+ ✘  Extension 'blah' not found in https://github.com/sorokya/eo-protocol-extensions
     Available extensions:
       deep
       custom-quest
