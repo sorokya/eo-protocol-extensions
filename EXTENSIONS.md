@@ -1,6 +1,6 @@
 # Authoring Extensions
 
-This guide explains how to create a protocol extension for use with `eolib-ext`.
+This guide explains how to create a protocol extension for use with `protomerge`.
 
 ---
 
@@ -9,7 +9,7 @@ This guide explains how to create a protocol extension for use with `eolib-ext`.
 An extension is a directory containing one or more `protocol.xml` files that add to or
 modify the base [eo-protocol](https://github.com/Cirras/eo-protocol) definitions.
 
-Extensions are applied in order using the `eolib-ext apply` command. Each extension can:
+Extensions are applied in order using the `protomerge apply` command. Each extension can:
 - **Add** new enums, structs, or packets
 - **Append** new values or fields to existing definitions
 - **Replace** existing definitions entirely
@@ -18,21 +18,25 @@ Extensions are applied in order using the `eolib-ext apply` command. Each extens
 
 ## Directory structure
 
-An extension mirrors the layout of `eo-protocol/xml/`:
+An extension mirrors the layout of `eo-protocol/xml/`. For a git-hosted extension, the
+extension directory is a **named subdirectory at the root of the repository** — the `name`
+attribute in `extensions.xml` determines which subdirectory is used:
 
 ```
-my-extension/
-  protocol.xml              ← top-level definitions (enums, structs, misc packets)
-  net/
-    client/
-      protocol.xml          ← client-to-server packets
-    server/
-      protocol.xml          ← server-to-client packets
-  pub/
-    protocol.xml            ← pub file type definitions (EIF, ENF, ESF, ECF)
+your-extension-repo/
+  my-extension/
+    protocol.xml              ← top-level definitions (enums, structs, misc packets)
+    net/
+      client/
+        protocol.xml          ← client-to-server packets
+      server/
+        protocol.xml          ← server-to-client packets
+    pub/
+      protocol.xml            ← pub file type definitions (EIF, ENF, ESF, ECF)
 ```
 
-Not all files are required — include only what your extension touches.
+For a `type="file"` extension, the same structure applies inside the directory you point
+`path` at. Not all files are required — include only what your extension touches.
 
 ---
 
@@ -130,27 +134,27 @@ Reference your extension directory directly in `extensions.xml`:
 Then apply:
 
 ```
-eolib-ext apply --language=rs --config=extensions.xml
+protomerge apply --config=extensions.xml
 ```
 
-### As part of a custom repository
+### As a git repository
 
-Host your extensions in a GitHub repo following the layout:
+A git extension repository contains named extension subdirectories at its root. The `name`
+attribute in `extensions.xml` determines which subdirectory is used:
 
 ```
-your-eo-protocol-extensions/
-  extensions/
-    my-feature/
-      protocol.xml
-      net/client/protocol.xml
-      net/server/protocol.xml
+your-extension-repo/
+  my-feature/
+    protocol.xml
+    net/client/protocol.xml
+    net/server/protocol.xml
 ```
 
 Reference it in `extensions.xml`:
 
 ```xml
 <extensions>
-  <extension type="git" name="my-feature" repo="https://github.com/your-org/your-eo-protocol-extensions"/>
+  <extension type="git" name="my-feature" repo="https://github.com/your-org/your-extension-repo"/>
 </extensions>
 ```
 
@@ -158,7 +162,7 @@ You can pin to a specific tag or commit with `ref`:
 
 ```xml
 <extension type="git" name="my-feature" ref="v1.2.0"
-           repo="https://github.com/your-org/your-eo-protocol-extensions"/>
+           repo="https://github.com/your-org/your-extension-repo"/>
 ```
 
 ---
@@ -174,14 +178,14 @@ You can pin to a specific tag or commit with `ref`:
 > evaluated for compatibility, stability, and value to the broader community.
 >
 > If you're building a custom server or client, we strongly encourage you to host your
-> extensions in your own repository instead. See
-> [As part of a custom repository](#as-part-of-a-custom-repository) above — it's just as easy
+> extension in its own repository instead. See
+> [As a git repository](#as-a-git-repository) above — it's just as easy
 > and gives you full control.
 
 To submit an extension to this repository for others to use:
 
 1. Fork this repo
-2. Create a directory under `extensions/<your-extension-name>/`
+2. Create a top-level directory named after your extension (e.g. `my-extension/`)
 3. Add your `protocol.xml` files following the structure above
 4. Open a pull request with a description of what your extension does and why
 
@@ -191,6 +195,5 @@ Extension names should be lowercase, hyphen-separated, and descriptive (e.g. `de
 
 ## See also
 
-- [`extensions/example/`](./example/) — a minimal reference extension
-- [`extensions.xml` format](../README.md#extensionsxml-format) in the main README
-- [eolib-ext CLI reference](../README.md#eolib-ext-cli)
+- [protomerge CLI reference](https://github.com/sorokya/protomerge)
+- [`extensions.xml` format](README.md#using-extensions-with-protomerge) in the main README

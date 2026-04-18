@@ -20,16 +20,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install eolib-ext
-        run: pip install -e .
+      - name: Install protomerge
+        run: pip install git+https://github.com/sorokya/protomerge.git
 
       - name: Write extensions config
         run: |
           cat > extensions.xml << 'EOF'
           <extensions>
-            <extension type="file" name="deep" path="extensions/deep" />
+            <extension type="file" name="deep" path="deep" />
           </extensions>
           EOF
 
       - name: Validate official extensions
-        run: eolib-ext validate --config=extensions.xml
+        run: protomerge validate --config=extensions.xml
