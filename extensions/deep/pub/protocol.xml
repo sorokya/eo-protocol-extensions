@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="ItemType" extend="append">
+        <value name="Transformation" extend="replace">5</value>
+        <value name="Spell" extend="replace">7</value>
+        <value name="Document" extend="replace">8</value>
+        <value name="Buff" extend="replace">26</value>
+        <value name="Debuff" extend="replace">27</value>
+        <value name="Title" extend="replace">28</value>
+        <value name="HairTool" extend="replace">29</value>
+    </enum>
+</protocol>

@@ -18,9 +18,48 @@
         <field name="y" type="char"/>
     </struct>
 
+    <enum name="ShapeType" type="char">
+        <value name="Circle">1</value>
+        <value name="Square">2</value>
+    </enum>
+
+    <!-- switch is a direct child -->
+    <struct name="Shape">
+        <field name="type" type="ShapeType"/>
+        <switch field="type">
+            <case value="Circle">
+                <field name="radius" type="char"/>
+            </case>
+            <case value="Square">
+                <field name="side" type="char"/>
+            </case>
+        </switch>
+    </struct>
+
+    <!-- switch is nested inside a chunked block -->
+    <struct name="ShapeMessage">
+        <chunked>
+            <field name="type" type="ShapeType"/>
+            <break/>
+            <switch field="type">
+                <case value="Circle">
+                    <field name="data" type="string"/>
+                </case>
+            </switch>
+        </chunked>
+    </struct>
+
     <packet family="Walk" action="Player">
-        <field name="direction" type="Direction"/>
-        <field name="timestamp" type="three"/>
-        <field name="coords" type="Coords"/>
+        <chunked>
+            <field name="direction" type="Direction"/>
+            <field name="timestamp" type="three"/>
+            <field name="coords" type="Coords"/>
+            <break/>
+            <switch field="direction">
+                <case value="Down">
+                    <field name="speed" type="char"/>
+                </case>
+            </switch>
+        </chunked>
     </packet>
 </protocol>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Append switch cases: tests both direct and chunked-nested switches -->
+<protocol>
+    <enum name="ShapeType" extend="append">
+        <value name="Triangle">3</value>
+    </enum>
+
+    <!-- switch is a direct child of the struct -->
+    <struct name="Shape" extend="append">
+        <switch field="type" extend="append">
+            <case value="Triangle">
+                <field name="base" type="char"/>
+                <field name="height" type="char"/>
+            </case>
+        </switch>
+    </struct>
+
+    <!-- switch is nested inside a chunked block — extension author just names the field -->
+    <struct name="ShapeMessage" extend="append">
+        <switch field="type" extend="append">
+            <case value="Square">
+                <field name="data" type="string"/>
+            </case>
+        </switch>
+    </struct>
+
+    <!-- switch nested inside chunked in a packet -->
+    <packet family="Walk" action="Player" extend="append">
+        <switch field="direction" extend="append">
+            <case value="Left">
+                <field name="speed" type="char"/>
+            </case>
+        </switch>
+    </packet>
+</protocol>

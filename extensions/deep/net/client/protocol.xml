@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="LookupType" type="char">
+        <value name="Item">1</value>
+        <value name="Npc">2</value>
+    </enum>
+
+    <packet family="Account" action="Accept">
+        <comment>
+            Sent after the account creation delay timer expires when email validation is enabled.
+        </comment>
+        <chunked>
+            <field name="sequence_number" type="short" />
+            <break />
+            <field name="account_name" type="string" />
+            <break />
+            <field name="email" type="string" />
+        </chunked>
+    </packet>
+
+    <packet family="Login" action="Take">
+        <comment>
+            Sent when the player clicks the "forgot password?" button on the main login dialog.
+        </comment>
+        <dummy type="byte">82</dummy>
+    </packet>
+
+    <packet family="Login" action="Create">
+        <comment>
+            Sent when the player enters and submits the account name they want to recover. The
+            server should generate and email a 7-digit PIN code.
+        </comment>
+        <field name="account_name" type="string" />
+    </packet>
+
+    <packet family="Login" action="Accept">
+        <comment>
+            Sent when the player enters the 7-digit PIN code received by email. The client
+            enforces exactly 7 characters.
+        </comment>
+        <field name="pin" type="string" />
+    </packet>
+
+    <packet family="Login" action="Agree">
+        <comment>
+            Sent when the player confirms a new password. For security, the client sends the
+            account name, PIN, and new password together.
+        </comment>
+        <chunked>
+            <field name="account_name" type="string" />
+            <break />
+            <field name="pin" type="string" />
+            <break />
+            <field name="password" type="string" />
+        </chunked>
+    </packet>
+
+    <packet family="Captcha" action="Reply">
+        <comment>
+            Sent with the player's captcha input. In server-checked mode the server validates
+            the string; otherwise the server always accepts it.
+        </comment>
+        <field name="id" type="short" />
+        <field name="captcha" type="string" />
+    </packet>
+
+    <packet family="Captcha" action="Request">
+        <comment>
+            Sent after 5 consecutive failures in server-checked mode. The server should respond
+            with an updated captcha via CaptchaAgree.
+        </comment>
+        <field name="id" type="short" />
+    </packet>
+
+    <packet family="Item" action="Report">
+        <comment>
+            Sent on use of title certificate. The client presents an input window; the player's
+            chosen title string is sent here.
+        </comment>
+        <chunked>
+            <field name="item_id" type="short" />
+            <break />
+            <field name="title" type="string" />
+        </chunked>
+    </packet>
+
+    <packet family="AdminInteract" action="Take">
+        <comment>
+            Sent instead of a chat line when the player types an #item or #npc command.
+            Contains the direct pub ID of the item or NPC.
+        </comment>
+        <field name="lookup_type" type="LookupType" />
+        <field name="id" type="short" />
+    </packet>
+</protocol>

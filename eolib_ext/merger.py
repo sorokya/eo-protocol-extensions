@@ -102,7 +102,12 @@ def merge_protocol_file(
             for child in el:
                 if child.tag in ("comment", ET.Comment):
                     continue
-                existing.append(child)
+                if child.get("extend") == "replace":
+                    _replace_child_value(existing, child, extension_name, extension_file)
+                elif child.tag == "switch" and child.get("extend") == "append":
+                    _append_switch_cases(existing, child, extension_name, extension_file)
+                else:
+                    existing.append(child)
             result.changes.append(ElementChange("append", tag, el_id))
 
         elif extend == "replace":
@@ -138,6 +143,61 @@ def _strip_extend(el: ET.Element) -> ET.Element:
     return new_el
 
 
+def _find_switch(el: ET.Element, field: str) -> Optional[ET.Element]:
+    """Recursively find the first <switch> with the given field attribute."""
+    for child in el:
+        if child.tag == "switch" and child.get("field") == field:
+            return child
+        result = _find_switch(child, field)
+        if result is not None:
+            return result
+    return None
+
+
+def _append_switch_cases(
+    existing: ET.Element,
+    switch_el: ET.Element,
+    extension_name: str,
+    extension_file: Path,
+) -> None:
+    """Append <case> children from switch_el into the matching <switch> inside existing."""
+    field = switch_el.get("field")
+    target_switch = _find_switch(existing, field)
+    if target_switch is None:
+        raise MergeError(
+            f"Extension '{extension_name}' ({extension_file}) tries to append cases "
+            f"to <switch field=\"{field}\"> in '{_element_id(existing)}' "
+            f"but no such switch exists."
+        )
+    for case in switch_el:
+        if case.tag not in ("comment", ET.Comment):
+            target_switch.append(case)
+
+
+def _replace_child_value(
+    parent: ET.Element,
+    replacement: ET.Element,
+    extension_name: str,
+    extension_file: Path,
+) -> None:
+    """
+    Replace an existing child <value> in parent whose numeric value matches replacement's.
+    The replacement element should carry extend="replace"; it is stripped before insertion.
+    """
+    target_num = (replacement.text or "").strip()
+    for i, child in enumerate(parent):
+        if child.tag == "value" and (child.text or "").strip() == target_num:
+            new_child = _strip_extend(replacement)
+            parent.remove(child)
+            parent.insert(i, new_child)
+            return
+    raise MergeError(
+        f"Extension '{extension_name}' ({extension_file}): "
+        f"<{parent.tag}> '{_element_id(parent)}' has no <value> with numeric value "
+        f"'{target_num}' to replace."
+    )
+
+
 def _check_no_numeric_conflicts(
     existing: ET.Element,
     extension_el: ET.Element,
@@ -158,6 +218,8 @@ def _check_no_numeric_conflicts(
         if child.tag == "value":
             num = (child.text or "").strip()
             name = child.get("name", "?")
+            if child.get("extend") == "replace":
+                continue  # intentional replacement of an existing value — not a conflict
             if num in existing_values:
                 raise MergeError(
                     f"Extension '{extension_name}' ({extension_file}): "

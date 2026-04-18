@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="PacketFamily" extend="append">
+        <value name="Boss">52</value>
+        <value name="Captcha">249</value>
+    </enum>
+
+    <enum name="PacketAction" extend="append">
+        <value name="Swap">35</value>
+        <value name="Config">220</value>
+    </enum>
+</protocol>

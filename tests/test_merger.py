@@ -119,11 +119,164 @@ class TestReplace:
         assert result.append_count == 0
 
 
+class TestChildValueReplace:
+    def test_renames_reserved_value(self, tmp_path):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="Direction" extend="append">
+        <value name="Sideways" extend="replace">1</value>
+    </enum>
+</protocol>"""
+        f = tmp_path / "protocol.xml"
+        f.write_text(xml)
+        elements = fresh_base()
+        merge_protocol_file(elements, f, "test")
+        direction = find_enum(elements, "Direction")
+        names = [v.get("name") for v in direction if v.tag == "value"]
+        assert "Sideways" in names
+        assert "Left" not in names  # was value 1, now replaced
+
+    def test_preserves_other_values(self, tmp_path):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="Direction" extend="append">
+        <value name="Sideways" extend="replace">1</value>
+    </enum>
+</protocol>"""
+        f = tmp_path / "protocol.xml"
+        f.write_text(xml)
+        elements = fresh_base()
+        merge_protocol_file(elements, f, "test")
+        direction = find_enum(elements, "Direction")
+        names = [v.get("name") for v in direction if v.tag == "value"]
+        assert "Down" in names
+        assert "Up" in names
+        assert "Right" in names
+
+    def test_preserves_position(self, tmp_path):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="Direction" extend="append">
+        <value name="Sideways" extend="replace">1</value>
+    </enum>
+</protocol>"""
+        f = tmp_path / "protocol.xml"
+        f.write_text(xml)
+        elements = fresh_base()
+        merge_protocol_file(elements, f, "test")
+        direction = find_enum(elements, "Direction")
+        values = [(v.get("name"), (v.text or "").strip()) for v in direction if v.tag == "value"]
+        idx = next(i for i, (_, num) in enumerate(values) if num == "1")
+        assert values[idx][0] == "Sideways"
+
+    def test_strips_extend_attr_from_result(self, tmp_path):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="Direction" extend="append">
+        <value name="Sideways" extend="replace">1</value>
+    </enum>
+</protocol>"""
+        f = tmp_path / "protocol.xml"
+        f.write_text(xml)
+        elements = fresh_base()
+        merge_protocol_file(elements, f, "test")
+        direction = find_enum(elements, "Direction")
+        for v in direction:
+            if v.tag == "value" and (v.text or "").strip() == "1":
+                assert "extend" not in v.attrib
+
+    def test_missing_numeric_value_raises(self, tmp_path):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="Direction" extend="append">
+        <value name="Sideways" extend="replace">99</value>
+    </enum>
+</protocol>"""
+        f = tmp_path / "protocol.xml"
+        f.write_text(xml)
+        elements = fresh_base()
+        with pytest.raises(MergeError, match="no <value> with numeric value"):
+            merge_protocol_file(elements, f, "test")
+
+    def test_no_conflict_for_replaced_values(self, tmp_path):
+        """A value with extend="replace" should not trigger the numeric conflict error."""
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="Direction" extend="append">
+        <value name="Sideways" extend="replace">1</value>
+        <value name="Extra">10</value>
+    </enum>
+</protocol>"""
+        f = tmp_path / "protocol.xml"
+        f.write_text(xml)
+        elements = fresh_base()
+        # Should not raise
+        merge_protocol_file(elements, f, "test")
+
+
 # ---------------------------------------------------------------------------
 # Error cases
 # ---------------------------------------------------------------------------
 
-class TestConflicts:
+class TestAppendSwitch:
+    def _get_switch_cases(self, el: ET.Element, field: str) -> list[str] | None:
+        """Recursively find a switch by field name and return its case values, or None if not found."""
+        for child in el:
+            if child.tag == "switch" and child.get("field") == field:
+                return [c.get("value") for c in child if c.tag == "case"]
+            result = self._get_switch_cases(child, field)
+            if result is not None:
+                return result
+        return None
+
+    def test_appends_case_to_direct_switch(self):
+        elements = fresh_base()
+        merge_protocol_file(elements, FIXTURES / "ext_append_switch" / "protocol.xml", "ext_switch")
+        shape = find_struct(elements, "Shape")
+        cases = self._get_switch_cases(shape, "type")
+        assert "Triangle" in cases
+        assert "Circle" in cases  # original preserved
+
+    def test_appends_case_to_switch_inside_chunked(self):
+        """The merger auto-detects the switch regardless of chunked nesting."""
+        elements = fresh_base()
+        merge_protocol_file(elements, FIXTURES / "ext_append_switch" / "protocol.xml", "ext_switch")
+        msg = find_struct(elements, "ShapeMessage")
+        cases = self._get_switch_cases(msg, "type")
+        assert "Square" in cases
+        assert "Circle" in cases  # original preserved
+
+    def test_appends_case_to_switch_in_packet_chunked(self):
+        """Works the same way for packets with a chunked-nested switch."""
+        elements = fresh_base()
+        merge_protocol_file(elements, FIXTURES / "ext_append_switch" / "protocol.xml", "ext_switch")
+        pkt = find_packet(elements, "Walk", "Player")
+        cases = self._get_switch_cases(pkt, "direction")
+        assert "Left" in cases
+        assert "Down" in cases  # original preserved
+
+    def test_result_counts(self):
+        elements = fresh_base()
+        result = merge_protocol_file(elements, FIXTURES / "ext_append_switch" / "protocol.xml", "ext_switch")
+        assert result.append_count == 4  # ShapeType enum + Shape + ShapeMessage + Walk::Player
+        assert result.new_count == 0
+        assert result.replace_count == 0
+
+    def test_missing_switch_raises(self, tmp_path):
+        xml = """<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <struct name="Shape" extend="append">
+        <switch field="no_such_field" extend="append">
+            <case value="Foo"><field name="x" type="char"/></case>
+        </switch>
+    </struct>
+</protocol>"""
+        f = tmp_path / "protocol.xml"
+        f.write_text(xml)
+        elements = fresh_base()
+        with pytest.raises(MergeError, match="no such switch"):
+            merge_protocol_file(elements, f, "test")
+
     def test_new_duplicate_raises(self):
         elements = fresh_base()
         with pytest.raises(MergeError, match="already exists"):

@@ -28,6 +28,8 @@ my-extension/
       protocol.xml          ← client-to-server packets
     server/
       protocol.xml          ← server-to-client packets
+  pub/
+    protocol.xml            ← pub file type definitions (EIF, ENF, ESF, ECF)
 ```
 
 Not all files are required — include only what your extension touches.
@@ -45,6 +47,21 @@ that controls the merge behavior:
 | `"append"` | **Append** — push child elements (values/fields/etc.) onto an existing definition. |
 | `"replace"` | **Replace** — completely swap out an existing definition with this one. |
 
+`extend="replace"` may also be used on individual `<value>` children inside an
+`extend="append"` enum block to rename a specific existing value by its numeric position,
+without replacing the whole enum:
+
+```xml
+<!-- Rename the "Reserved7" placeholder to "Spell" while leaving all other values alone -->
+<enum name="ItemType" extend="append">
+    <value name="Spell" extend="replace">7</value>
+</enum>
+```
+
+The merger finds the child `<value>` with text content `7`, replaces it in-place with the
+new element (stripping the `extend` attribute from the result), and raises an error if no
+value with that number exists.
+
 ### Examples
 
 ```xml
@@ -59,13 +76,31 @@ that controls the merge behavior:
     <value name="Rarity">200</value>
 </enum>
 
+<!-- Rename an existing reserved value by its numeric position -->
+<enum name="ItemType" extend="append">
+    <value name="Spell" extend="replace">7</value>
+    <value name="Transformation" extend="replace">5</value>
+</enum>
+
 <!-- Replace an existing struct entirely -->
 <struct name="Coords" extend="replace">
     <field name="x" type="short"/>
     <field name="y" type="short"/>
     <field name="layer" type="char"/>
 </struct>
+
+<!-- Add new cases to a switch inside an existing struct or packet -->
+<struct name="AvatarChange" extend="append">
+    <switch field="change_type" extend="append">
+        <case value="Skin">
+            <field name="skin" type="char"/>
+        </case>
+    </switch>
+</struct>
 ```
+
+The merger locates the target `<switch>` by its `field` attribute, searching recursively —
+it works whether the switch is a direct child or nested inside a `<chunked>` block.
 
 ---
 
@@ -75,6 +110,8 @@ that controls the merge behavior:
 - **Append to nonexistent target** → error. Check name spelling and extension order.
 - **Replace nonexistent target** → error.
 - **Append enum with duplicate numeric value** → error (numeric conflicts corrupt generated code).
+- **Child value replace with nonexistent numeric value** → error. Check the number is correct.
+- **Switch append with no matching `field`** → error. Check the field name.
 
 ---
 

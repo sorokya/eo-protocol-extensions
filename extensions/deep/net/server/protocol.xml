@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol>
+    <enum name="AccountReply" extend="append">
+        <value name="WrongPin">8</value>
+    </enum>
+
+    <enum name="AvatarChangeType" extend="append">
+        <value name="Skin">4</value>
+        <value name="Gender">5</value>
+    </enum>
+
+    <enum name="AccountValidationReply" type="short">
+        <value name="Busy">0</value>
+        <value name="OK">1</value>
+        <value name="TooManyAttempts">2</value>
+    </enum>
+
+    <enum name="AccountRecoverReply" type="short">
+        <value name="AccountNotFound">0</value>
+        <value name="RequestAccepted">1</value>
+        <value name="RequestAcceptedShowEmail">2</value>
+        <value name="TooManyAttempts">3</value>
+        <value name="RecoveryDisabled">4</value>
+        <value name="Busy">5</value>
+        <value name="TooManyEmails">6</value>
+    </enum>
+
+    <enum name="AccountRecoverPinReply" type="short">
+        <value name="WrongPin">0</value>
+        <value name="OK">1</value>
+    </enum>
+
+    <enum name="AccountRecoverUpdateReply" type="short">
+        <value name="Error">0</value>
+        <value name="OK">1</value>
+    </enum>
+
+    <struct name="DialogLine">
+        <field name="left" type="string" />
+        <break />
+        <field name="right" type="string" />
+        <break />
+    </struct>
+
+    <struct name="AvatarChange" extend="append">
+        <switch field="change_type" extend="append">
+            <case name="Skin">
+                <field name="skin" type="char" />
+            </case>
+            <case name="Gender">
+                <field name="gender" type="Gender" />
+            </case>
+        </switch>
+    </struct>
+
+    <packet family="Account" action="Config">
+        <comment>
+            Optional packet sent immediately after receiving the Account::Request packet.
+            delay_time initializes the account creation delay in seconds (10-600).
+            email_validation=1 forces the client into emailed PIN-code validation mode.
+        </comment>
+        <field name="delay_time" type="short" />
+        <field name="email_validation" type="bool" />
+    </packet>
+
+    <packet family="Account" action="Accept">
+        <comment>Server response to the Account::Accept (client) validation packet.</comment>
+        <field name="reply_code" type="AccountValidationReply" />
+    </packet>
+
+    <packet family="Login" action="Config">
+        <comment>
+            Optional packet sent immediately after accepting the first Login::Request packet.
+            Initializes the character creation dialog: number of unlocked skins, number of
+            selectable hair modals, and maximum character name length (valid range: 12-14).
+        </comment>
+        <field name="max_skins" type="short" />
+        <field name="max_hair_modals" type="short" />
+        <field name="max_character_name" type="char" />
+    </packet>
+
+    <packet family="Login" action="Take">
+        <comment>Server response to the Login::Take (forgot password) client packet. Opens the
+            password recovery screen on the client.</comment>
+        <field name="reply_code" type="AccountRecoverReply" />
+    </packet>
+
+    <packet family="Login" action="Create">
+        <comment>
+            Server response after the client submits an account name for password recovery. On
+            RequestAcceptedShowEmail the masked email address is included.
+        </comment>
+        <chunked>
+            <field name="reply_code" type="AccountRecoverReply" />
+            <break />
+            <switch field="reply_code">
+                <case name="RequestAcceptedShowEmail">
+                    <field name="email" type="string" />
+                </case>
+            </switch>
+        </chunked>
+    </packet>
+
+    <packet family="Login" action="Accept">
+        <comment>Server response after the client submits the 7-digit recovery PIN code.</comment>
+        <field name="reply_code" type="AccountRecoverPinReply" />
+    </packet>
+
+    <packet family="Login" action="Agree">
+        <comment>
+            Server response after the client submits the new password. On OK the client returns
+            to the main menu.
+        </comment>
+        <field name="reply_code" type="AccountRecoverUpdateReply" />
+    </packet>
+
+    <packet family="Boss" action="Ping">
+        <comment>
+            Broadcast the current HP of a boss NPC to nearby (or map-wide) players. Suggested
+            usage: send on every hit or heal. killed=true removes the HP bar and plays the flashing
+            skull animation.
+        </comment>
+        <field name="npc_index" type="short" />
+        <field name="npc_id" type="short" />
+        <field name="hp" type="three" />
+        <field name="hp_percentage" type="char" />
+        <field name="killed" type="bool" />
+    </packet>
+
+    <packet family="Captcha" action="Open">
+        <comment>Shows the captcha popup on the client.</comment>
+        <chunked>
+            <field name="id" type="short" />
+            <field name="reward_exp" type="three" />
+            <break />
+            <field name="captcha" type="string" optional="true">
+                <comment>Send for server-checked mode. Client will generate captcha if omitted.</comment>
+            </field>
+        </chunked>
+    </packet>
+
+    <packet family="Captcha" action="Agree">
+        <comment>
+            Displays a new captcha challenge on the already-open popup. Used in server-checked
+            mode after too many wrong answers.
+        </comment>
+        <field name="id" type="short" />
+        <field name="captcha" type="string" />
+    </packet>
+
+    <packet family="Captcha" action="Close">
+        <comment>
+            Closes the captcha popup with a success sound and displays the earned experience.
+            Must be sent in both server-checked and client-checked modes to correctly sync the
+            experience reward.
+        </comment>
+        <field name="experience" type="int" />
+    </packet>
+
+    <packet family="AdminInteract" action="Create">
+        <comment>
+            Opens a new info dialog on the client with a caption and one or more lines. Client
+            ignores subsequent AdminInteract::Add packets if no dialog is open.
+        </comment>
+        <chunked>
+            <field name="title" type="string" />
+            <break />
+            <array name="lines" type="DialogLine" />
+        </chunked>
+    </packet>
+
+    <packet family="AdminInteract" action="Add">
+        <comment>
+            Appends one or more lines to an already-visible info dialog. The client ignores
+            this packet if no dialog is currently open.
+        </comment>
+        <chunked>
+            <array name="lines" type="DialogLine" />
+        </chunked>
+    </packet>
+
+    <packet family="Paperdoll" action="Swap">
+        <comment>
+            Send instead of PaperdollAgree when equipping an item causes a previously
+            equipped item to be returned to inventory. Includes the full paperdoll stats update. The
+            difference from PaperdollAgree is the five bytes for removed_item_id and
+            removed_item_amount.
+        </comment>
+        <field name="change" type="AvatarChange" />
+        <field name="item_id" type="short" />
+        <field name="remaining_amount" type="three" />
+        <field type="char">0</field>
+        <field name="removed_item_id" type="short" />
+        <field name="removed_item_amount" type="three" />
+        <field name="stats" type="CharacterStatsEquipmentChange" />
+    </packet>
+
+    <packet family="Barber" action="Open" extend="append">
+        <comment>
+            Extra fields appended for deep clients. The 0.2.X client reads these bytes to
+            initialize the barber shop window with the correct hair style count and pricing.
+        </comment>
+        <field name="max_hair_styles" type="short" />
+        <field name="base_cost" type="short" />
+        <field name="cost_per_level" type="short" />
+    </packet>
+</protocol>
