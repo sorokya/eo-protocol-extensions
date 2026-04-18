@@ -248,12 +248,15 @@ def validate(
     # Dry-run merge
     for resolved in resolved_extensions:
         ext_files = resolve_extension_files(resolved)
+        ext_root = Path(resolved.local_path)
         try:
             for ext_file in ext_files:
+                rel = ext_file.relative_to(ext_root)
                 result = merge_protocol_file(base_elements, ext_file, resolved.name)
-                console.print(f"  [green]✓[/green] {resolved.name:<20} {result.summary()}")
+                label = f"{resolved.name}/{rel}"
+                console.print(f"  [green]✓[/green] {label:<40} {result.summary()}")
         except MergeError as e:
-            console.print(f"  [red]✗[/red] {resolved.name:<20} conflict")
+            console.print(f"  [red]✗[/red] {resolved.name:<40} conflict")
             err_console.print(f"\n[red]Conflict:[/red] {e}")
             raise typer.Exit(1)
 
