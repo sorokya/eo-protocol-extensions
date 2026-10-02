@@ -36,22 +36,72 @@
     </enum>
 
     <struct name="DialogLine">
-        <field name="left" type="string" />
-        <break />
-        <field name="right" type="string" />
-        <break />
+        <chunked>
+            <field name="left" type="string" />
+            <break />
+            <field name="right" type="string" />
+            <break />
+        </chunked>
     </struct>
 
     <struct name="AvatarChange" extend="append">
         <switch field="change_type" extend="append">
-            <case name="Skin">
+            <case value="Skin">
                 <field name="skin" type="char" />
             </case>
-            <case name="Gender">
+            <case value="Gender">
                 <field name="gender" type="Gender" />
             </case>
         </switch>
     </struct>
+
+    <packet family="Account" action="Reply" extend="replace">
+        <comment>Reply to client Account-family packets</comment>
+        <field name="reply_code" type="AccountReply">
+            <comment>
+                Sometimes an AccountReply code, sometimes a session ID for account creation
+            </comment>
+        </field>
+        <switch field="reply_code">
+            <case value="0">
+                <!-- No effect in the official client -->
+            </case>
+            <case value="Exists">
+                <field type="string">NO</field>
+            </case>
+            <case value="NotApproved">
+                <field type="string">NO</field>
+            </case>
+            <case value="Created">
+                <field type="string">GO</field>
+            </case>
+            <case value="4">
+                <!-- No effect in the official client -->
+            </case>
+            <case value="ChangeFailed">
+                <field type="string">NO</field>
+            </case>
+            <case value="Changed">
+                <field type="string">OK</field>
+            </case>
+            <case value="RequestDenied">
+                <field type="string">NO</field>
+            </case>
+            <case value="WrongPin">
+                <!-- Client stays on the PIN code validation screen -->
+            </case>
+            <case value="9">
+                <!-- No effect in the official client -->
+            </case>
+            <case default="true">
+                <comment>
+                    In this case (reply_code &gt; 9), reply_code is a session ID for account creation
+                </comment>
+                <field name="sequence_start" type="char"/>
+                <field type="string">OK</field>
+            </case>
+        </switch>
+    </packet>
 
     <packet family="Account" action="Config">
         <comment>
@@ -94,7 +144,7 @@
             <field name="reply_code" type="AccountRecoverReply" />
             <break />
             <switch field="reply_code">
-                <case name="RequestAcceptedShowEmail">
+                <case value="RequestAcceptedShowEmail">
                     <field name="email" type="string" />
                 </case>
             </switch>

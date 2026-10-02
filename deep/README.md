@@ -65,6 +65,12 @@ Official implementation guide: https://www.endless-online.com/deep/techinfo.html
 |---|---|
 | `BarberOpen` | `max_hair_styles`, `base_cost`, `cost_per_level` |
 
+### Replaced server packets
+
+| Packet | Change |
+|---|---|
+| `AccountReply` | Switch case `8` refers to the new `AccountReply::WrongPin` value by name |
+
 ### New client packets
 
 | Packet | Description |
